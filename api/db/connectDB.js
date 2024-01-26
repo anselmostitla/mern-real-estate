@@ -7,6 +7,6 @@ const MONGO_URL = `mongodb+srv://domloyordi:${MONGO_PASS}@cluster0.bnno0fa.mongo
 
 export const connector = () => {
    mongoose.connect(MONGO_URL)
-   console.log("db connected...")
+   console.log("db connected...")   
 }
 
