@@ -18,6 +18,6 @@ const userSchema = new mongoose.Schema({
       required: [true, 'must provide password'],
    }
 },{timestamps: true})
-
+  
 const User = mongoose.model("User", userSchema)
 export default User
