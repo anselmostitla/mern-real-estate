@@ -40,7 +40,7 @@ export const signin = async (req, res, next) => {
 
   try {
     const validUser = await User.findOne({ email });
-    if (!validUser) return next(errorHandler(404, "Email not found"));
+    if (!validUser) return next(errorHandler(404, "Wrong credentials"));
   
     const validPassword = bcryptjs.compareSync(password, validUser.password);
     if (!validPassword) return next(errorHandler(401, "Wrong credentials"));
@@ -49,7 +49,7 @@ export const signin = async (req, res, next) => {
   
     const {password: pass, ...restUserInfo} = validUser._doc
   
-    res.cookie("access token", token, {httpOnly: true}).status(201).json({msg: 'User created', token, restUserInfo})
+    res.cookie("access token", token, {httpOnly: true}).status(201).json({msg: 'User logged in', token, restUserInfo})
   } catch (error) {
     next(error)
   }
