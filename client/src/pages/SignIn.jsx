@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { signInSuccess } from "../redux/user/userSlice";
 
 // In this part for the form I followed this tutorial: https://youtu.be/LobZv3i6BXk?si=ALuudRPRbKZjmEn5
 import { useForm } from "react-hook-form";
@@ -16,7 +18,7 @@ const validationSchema = yup
 
 export default function SignIn() {
   const [loading, setLoading] = useState(false);
-
+  // const {loading, error} = useSelector((state) => state.user)
   const {
     register,
     handleSubmit,
@@ -32,9 +34,11 @@ export default function SignIn() {
   });
 
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const onSubmit = async (data) => {
     setLoading(true);
+    // dispatch(signInStart())
     try {
       const res = await axios.post(
         // "http://localhost:3000/api/v1/auth/signup" was put as a proxi vite.config.js
@@ -46,7 +50,7 @@ export default function SignIn() {
         reset()
         navigate('/')
       } 
-      
+      dispatch(signInSuccess(res.data))
     } catch (err) {
       console.log("ERROR: ", err)
       const message = err?.response?.data?.message;
@@ -61,10 +65,12 @@ export default function SignIn() {
       if(message?.password?.length){
         setError("password", { type: "server", message:message.password});
       }
+      // dispatch(signInFailure(message))
     }
 
 
     setLoading(false);
+    
     
   };
 
