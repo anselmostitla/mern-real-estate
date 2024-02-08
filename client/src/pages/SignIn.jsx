@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { signInSuccess } from "../redux/user/userSlice";
+import { signInSuccess, signInFailure } from "../redux/user/userSlice";
 
 // In this part for the form I followed this tutorial: https://youtu.be/LobZv3i6BXk?si=ALuudRPRbKZjmEn5
 import { useForm } from "react-hook-form";
@@ -66,6 +66,8 @@ export default function SignIn() {
         setError("password", { type: "server", message:message.password});
       }
       // dispatch(signInFailure(message))
+      
+      dispatch(signInFailure())
     }
 
 
