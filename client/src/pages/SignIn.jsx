@@ -8,6 +8,7 @@ import { signInSuccess, signInFailure } from "../redux/user/userSlice";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import OAuth from "../components/OAuth.jsx";
 
 const validationSchema = yup
   .object({
@@ -113,6 +114,7 @@ export default function SignIn() {
             {errors.signin.message}
           </span>
         )}
+        <OAuth/>
       </form>
       <div className="flex gap-2 mt-5 ">
         <p>Do not have an account?</p>

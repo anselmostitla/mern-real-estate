@@ -41,20 +41,63 @@ export const signin = async (req, res, next) => {
   try {
     const validUser = await User.findOne({ email });
     if (!validUser) return next(errorHandler(404, "Wrong credentials"));
-  
+
     const validPassword = bcryptjs.compareSync(password, validUser.password);
     if (!validPassword) return next(errorHandler(401, "Wrong credentials"));
-  
-    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET, {expiresIn:'2d'});
-  
-    const {password: pass, ...restUserInfo} = validUser._doc
-  
-    res.cookie("access token", token, {httpOnly: true}).status(201).json({msg: 'User logged in', token, restUserInfo})
+
+    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "2d",
+    });
+
+    const { password: pass, ...restUserInfo } = validUser._doc;
+
+    res
+      .cookie("access token", token, { httpOnly: true })
+      .status(201)
+      .json({ msg: "User logged in", token, restUserInfo });
   } catch (error) {
-    next(error)
+    next(error);
   }
-  
-  
+};
 
+export const google = async (req, res, next) => {
+  try {
+    const validUser = await User.findOne({ email: req.body.email });
 
+    if (validUser) {
+      const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET, {
+        expiresIn: "2d",
+      });
+      const { password: pass, ...restUserInfo } = validUser._doc;
+      console.log("restUserInfo: ", restUserInfo)
+      res
+        .cookie("access token", token, { httpOnly: true })
+        .status(201)
+        .json({ msg: "User logged in", token, restUserInfo });
+    } else {
+      const generatedPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
+      console.log("generatedPassword: ", generatedPassword)
+      const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+      const newUser = await User.create({
+        username:
+          req.body.name.split(" ").join("").toLowerCase() +
+          Math.random().toString(36).slice(-4),
+        email: req.body.email,
+        password: hashedPassword,
+        avatar: req.body.photo,
+      });
+      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+        expiresIn: "2d",
+      });
+      const { password: pass, ...restUserInfo } = newUser._doc;
+      res
+        .cookie('access token', token, {httpOnly:true})
+        .status(201)
+        .json({msg: "User logged in", token, restUserInfo})
+    }
+  } catch (error) {
+    next(error);
+  }
 };

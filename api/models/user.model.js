@@ -16,7 +16,10 @@ const userSchema = new mongoose.Schema({
    password: {
       type: String,
       required: [true, 'must provide password'],
-
+   },
+   avatar: {
+      type: String,
+      default: "https://www.pngkey.com/png/full/115-1150152_default-profile-picture-avatar-png-green.png"
    }
 },{timestamps: true})
   
