@@ -25,7 +25,7 @@ export default function SignIn() {
     handleSubmit,
     formState: { errors },
     setError,
-    reset
+    reset,
   } = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -34,10 +34,11 @@ export default function SignIn() {
     },
   });
 
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const onSubmit = async (data) => {
+    console.log("on submit signin");
     setLoading(true);
     // dispatch(signInStart())
     try {
@@ -46,35 +47,33 @@ export default function SignIn() {
         "/api/v1/auth/signin",
         data
       );
-      console.log("RES: ", res)
-      if(res){
-        reset()
-        navigate('/')
-      } 
-      dispatch(signInSuccess(res.data))
+      // console.log("res signin: ", res);
+      // console.log("res.data.restUserInfo signin: ", res.data.restUserInfo);
+      dispatch(signInSuccess(res.data.restUserInfo));
+      if (res) {
+        reset();
+        navigate("/");
+      }
     } catch (err) {
-      console.log("ERROR: ", err)
+      console.log("ERROR: ", err);
       const message = err?.response?.data?.message;
-      if(message) setError("signin", {type: "server", message})
+      if (message) setError("signin", { type: "server", message });
 
-      if(message?.username?.length){
-        setError("username", { type: "server", message:message.username});
+      if (message?.username?.length) {
+        setError("username", { type: "server", message: message.username });
       }
-      if(message?.email?.length){
-        setError("email", { type: "server", message:message.email});
+      if (message?.email?.length) {
+        setError("email", { type: "server", message: message.email });
       }
-      if(message?.password?.length){
-        setError("password", { type: "server", message:message.password});
+      if (message?.password?.length) {
+        setError("password", { type: "server", message: message.password });
       }
       // dispatch(signInFailure(message))
-      
-      dispatch(signInFailure())
+
+      dispatch(signInFailure());
     }
 
-
     setLoading(false);
-    
-    
   };
 
   return (
@@ -114,7 +113,7 @@ export default function SignIn() {
             {errors.signin.message}
           </span>
         )}
-        <OAuth/>
+        <OAuth />
       </form>
       <div className="flex gap-2 mt-5 ">
         <p>Do not have an account?</p>

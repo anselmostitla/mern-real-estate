@@ -18,10 +18,10 @@ export default function OAuth() {
         name: result.user.displayName,
         email: result.user.email, photo: result.user.photoURL
       });
-      console.log("res: ", res)
+      
       if (res){
         navigate('/')
-        dispatch(signInSuccess(res.data))
+        dispatch(signInSuccess(res.data.restUserInfo))
       }
       
     } catch (error) {

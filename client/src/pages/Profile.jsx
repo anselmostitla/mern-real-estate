@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useRef } from "react";
 import {
   getDownloadURL,
@@ -8,50 +8,21 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { app } from "../firebase";
-
-// In this part for the form I followed this tutorial: https://youtu.be/LobZv3i6BXk?si=ALuudRPRbKZjmEn5
-import { useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import OAuth from "../components/OAuth";
-
-const validationSchema = yup
-  .object({
-    username: yup.string().required("missing username"),
-    email: yup.string().required("missing email").email("Invalid email format"),
-    password: yup.string().required("missing password"),
-  })
-  .required();
+import axios from "axios";
+import { updateSuccess } from "../redux/user/userSlice";
 
 export default function Profile() {
   const { currentUser } = useSelector((state) => state.user);
+  console.log("currentUser profile: ", currentUser);
+  const dispatch = useDispatch();
   const fileRef = useRef(null);
   const [file, setFile] = useState(undefined);
   const [progresspercent, setProgresspercent] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
-  console.log("formData: ", formData);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError,
-    reset,
-  } = useForm({
-    resolver: yupResolver(validationSchema),
-    defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-    },
-  });
-
-  // Firebase storage
-  // allow read;
-  // allow write: if
-  // request.resource.size < 2 * 1024 * 1024 &&
-  // request.resource.contentType.matches('image/.*')
+  const [errorUpdating, setErrorUpdating] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successUpdating, setSuccessUpdating] = useState(false);
 
   const handleFileUpload = (e) => {
     e.preventDefault();
@@ -84,10 +55,36 @@ export default function Profile() {
     );
   };
 
+  const handleChange = async (e) => {
+    e.preventDefault();
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      // console.log("currentUser handle submit profile: ", currentUser)
+      const res = await axios.put(
+        `/api/v1/user/update/${currentUser._id}`,
+        formData
+      );
+      console.log("res.data profile: ", res.data);
+      dispatch(updateSuccess(res.data));
+      setSuccessUpdating(true)
+    } catch (error) {
+      console.log("error: ", error);
+      console.log("error.response: ", error.response);
+      console.log("error.response.message: ", error.response.data.message);
+      setErrorUpdating(error.response.data.message);
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
-      <form className="flex flex-col gap-4">
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <input
           onChange={(e) => handleFileUpload(e)}
           type="file"
@@ -97,7 +94,7 @@ export default function Profile() {
         />
         <img
           onClick={() => fileRef.current.click()}
-          src={formData.avatar || currentUser.restUserInfo.avatar}
+          src={formData.avatar || currentUser.avatar}
           alt="profile"
           className="rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2"
         />
@@ -117,28 +114,44 @@ export default function Profile() {
         <input
           className="border p-3 rounded-lg"
           placeholder="username"
-          {...register("username")}
+          defaultValue={currentUser.username}
+          id="username"
+          onChange={handleChange}
+          // {...register("username")}
         />
         <input
           className="border p-3 rounded-lg"
           placeholder="email"
+          defaultValue={currentUser.email}
+          id="email"
+          onChange={handleChange}
           type="email"
-          {...register("email")}
+          // {...register("email")}
         />
         <input
           className="border p-3 rounded-lg"
           placeholder="password"
+          id="password"
+          onChange={handleChange}
           type="password"
-          {...register("password")}
+          // {...register("password")}
         />
-        <button className="bg-slate-700 text-white rounded-lg p-3 hover:opacity-95 disabled:opacity-80">
-          UPDATE
+        <button
+          disabled={loading}
+          className="bg-slate-700 text-white rounded-lg p-3 hover:opacity-95 disabled:opacity-80"
+        >
+          {loading ? "Loading..." : "UPDATE"}
         </button>
       </form>
+
       <div className="flex justify-between mt-5">
         <span className="text-red-700 cursor-pointer">Delete account</span>
         <span className="text-red-700 cursor-pointer">Sign-out</span>
       </div>
+      <p className="text-red-500 text-sm mt-5">{errorUpdating}</p>
+      <p className="text-green-500 text-sm mt-5">
+        {successUpdating? 'User updated successfully!':''}
+      </p>
     </div>
   );
 }
