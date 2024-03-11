@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRef } from "react";
 import {
@@ -9,14 +9,14 @@ import {
 } from "firebase/storage";
 import { app } from "../firebase";
 import axios from "axios";
-import { updateSuccess } from "../redux/user/userSlice";
+import { updateSuccess, deleteUserSucces } from "../redux/user/userSlice";
 
 export default function Profile() {
   const { currentUser } = useSelector((state) => state.user);
   console.log("currentUser profile: ", currentUser);
   const dispatch = useDispatch();
   const fileRef = useRef(null);
-  const [file, setFile] = useState(undefined);
+  // const [file, setFile] = useState(undefined);
   const [progresspercent, setProgresspercent] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
@@ -46,6 +46,8 @@ export default function Profile() {
       },
       (error) => {
         setFileUploadError(true);
+        console.log(error)
+
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
@@ -80,6 +82,18 @@ export default function Profile() {
     }
     setLoading(false);
   };
+
+  const handleDelete = async() => {
+    try {
+      const res = await axios.delete(`/api/v1/user/delete/${currentUser._id}`)
+      if (res.status === 200) {
+        dispatch(deleteUserSucces())
+      }
+      
+    } catch (error) {
+      console.log(error.message)
+    }
+  }
 
   return (
     <div className="p-3 max-w-lg mx-auto">
@@ -145,7 +159,7 @@ export default function Profile() {
       </form>
 
       <div className="flex justify-between mt-5">
-        <span className="text-red-700 cursor-pointer">Delete account</span>
+        <span onClick={handleDelete} className="text-red-700 cursor-pointer">Delete account</span>
         <span className="text-red-700 cursor-pointer">Sign-out</span>
       </div>
       <p className="text-red-500 text-sm mt-5">{errorUpdating}</p>

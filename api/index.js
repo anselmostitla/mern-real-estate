@@ -24,7 +24,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  connector();
+app.listen(PORT, async() => {
+  await connector();
   console.log(`Server running on port ${PORT}`);
 });
