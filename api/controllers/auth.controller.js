@@ -69,7 +69,7 @@ export const google = async (req, res, next) => {
         expiresIn: "2d",
       });
       const { password: pass, ...restUserInfo } = validUser._doc;
-      console.log("restUserInfo: ", restUserInfo)
+      console.log("restUserInfo: ", restUserInfo);
       res
         .cookie("access token", token, { httpOnly: true })
         .status(201)
@@ -78,7 +78,7 @@ export const google = async (req, res, next) => {
       const generatedPassword =
         Math.random().toString(36).slice(-8) +
         Math.random().toString(36).slice(-8);
-      console.log("generatedPassword: ", generatedPassword)
+      console.log("generatedPassword: ", generatedPassword);
       const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
       const newUser = await User.create({
         username:
@@ -93,10 +93,19 @@ export const google = async (req, res, next) => {
       });
       const { password: pass, ...restUserInfo } = newUser._doc;
       res
-        .cookie('access token', token, {httpOnly:true})
+        .cookie("access token", token, { httpOnly: true })
         .status(201)
-        .json({msg: "User logged in", token, restUserInfo})
+        .json({ msg: "User logged in", token, restUserInfo });
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const signOut = (req, res, next) => {
+  try {
+    res.clearCookie("access_token");
+    res.status(200).json("User has been loged out!");
   } catch (error) {
     next(error);
   }

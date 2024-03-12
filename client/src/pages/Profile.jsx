@@ -9,7 +9,7 @@ import {
 } from "firebase/storage";
 import { app } from "../firebase";
 import axios from "axios";
-import { updateSuccess, deleteUserSucces } from "../redux/user/userSlice";
+import { updateSuccess, deleteUserSucces, signOutUserSuccess } from "../redux/user/userSlice";
 
 export default function Profile() {
   const { currentUser } = useSelector((state) => state.user);
@@ -95,6 +95,17 @@ export default function Profile() {
     }
   }
 
+  const handleSignOut = async() => {
+    try {
+      const res = await axios.get(`/api/v1/auth/signout`)
+      if(res.status ===200){
+        dispatch(signOutUserSuccess())
+      }
+    } catch (error) {
+      console.log(error.message)
+    }
+  }
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -160,7 +171,7 @@ export default function Profile() {
 
       <div className="flex justify-between mt-5">
         <span onClick={handleDelete} className="text-red-700 cursor-pointer">Delete account</span>
-        <span className="text-red-700 cursor-pointer">Sign-out</span>
+        <span onClick={handleSignOut} className="text-red-700 cursor-pointer">Sign-out</span>
       </div>
       <p className="text-red-500 text-sm mt-5">{errorUpdating}</p>
       <p className="text-green-500 text-sm mt-5">
